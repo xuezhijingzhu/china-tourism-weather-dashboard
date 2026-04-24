@@ -40,6 +40,16 @@ export interface CityDirectoryItem {
   aliases?: string[];
 }
 
+export interface AttractionCandidate {
+  id: string;
+  attractionName: string;
+  city: string;
+  province: string;
+  sourceName: string;
+  sourceUrl: string;
+  note?: string;
+}
+
 export interface ProvinceWeatherOverview {
   province: string;
   cities: string[];

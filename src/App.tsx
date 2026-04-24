@@ -4,6 +4,7 @@ import { CrowdCard } from './components/CrowdCard';
 import { Layout } from './components/Layout';
 import { SearchBar } from './components/SearchBar';
 import { WeatherCard } from './components/WeatherCard';
+import { getAttractionCandidatesByCity } from './data/attractionCandidates';
 import { mockCrowdData } from './data/mockCrowd';
 import { cityDirectory } from './data/regionDirectory';
 import { crowdService } from './services/crowdService';
@@ -60,7 +61,9 @@ function App() {
     attractions.find((item) => item.id === selectedAttractionId) ??
     mockCrowdData.find((item) => item.id === selectedAttractionId) ??
     null;
+
   const trendData = activeAttraction ? activeAttraction.trend : attractions.length ? averageTrend(attractions) : [];
+  const attractionCandidates = selectedCity ? getAttractionCandidatesByCity(selectedCity) : [];
   const tips = buildTravelTips({
     temperature: weather?.temperature ?? provinceOverview?.averageTemperature ?? undefined,
     condition: weather?.condition ?? provinceOverview?.weatherSummary,
@@ -93,6 +96,12 @@ function App() {
       center: cityMeta?.center,
     });
     setSearchStatus(`已定位到 ${province} · ${city}。`);
+    setIsSearchEmpty(false);
+  };
+
+  const resetMapView = () => {
+    setFocusResult(null);
+    setSearchStatus('已返回全国视图，右侧数据保持当前选中地区。');
     setIsSearchEmpty(false);
   };
 
@@ -138,12 +147,13 @@ function App() {
     const provinceMatch = Array.from(new Set(cityDirectory.map((item) => item.province))).find(
       (province) => province.includes(trimmed) || province.includes(normalized),
     );
+
     if (provinceMatch) {
       selectProvince(provinceMatch);
       return;
     }
 
-    setSearchStatus(`没有找到 “${trimmed}” 对应的省份、城市或景点。可以试试 “北京”“广州塔”“西湖”。`);
+    setSearchStatus(`没有找到 “${trimmed}” 对应的省份、城市或景点。可以试试 “大连”“营口”“千山风景区”。`);
     setIsSearchEmpty(true);
   };
 
@@ -158,13 +168,14 @@ function App() {
               focusResult={focusResult}
               onProvinceSelect={selectProvince}
               onCitySelect={selectCity}
+              onResetView={resetMapView}
             />
           </Suspense>
         </div>
         <div className={styles.panelColumn}>
           <WeatherCard weather={weather} provinceOverview={provinceOverview} />
           <CrowdCard attractions={attractions} />
-          <AttractionList attractions={attractions} />
+          <AttractionList attractions={attractions} candidates={attractionCandidates} />
           <section className={styles.glassCard}>
             <div className={styles.panelHead}>
               <div>

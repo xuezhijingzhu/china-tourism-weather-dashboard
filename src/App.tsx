@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { AttractionList } from './components/AttractionList';
-import { ChinaMap } from './components/ChinaMap';
 import { CrowdCard } from './components/CrowdCard';
 import { Layout } from './components/Layout';
 import { SearchBar } from './components/SearchBar';
-import { TrendChart } from './components/TrendChart';
 import { WeatherCard } from './components/WeatherCard';
 import { mockCrowdData } from './data/mockCrowd';
 import { cityDirectory } from './data/regionDirectory';
@@ -13,6 +11,16 @@ import { weatherService } from './services/weatherService';
 import type { AttractionCrowdData, ProvinceWeatherOverview, SearchResult, WeatherData } from './types';
 import { averageTrend, buildTravelTips, normalizeRegionName } from './utils/format';
 import styles from './App.module.css';
+
+const ChinaMap = lazy(async () => {
+  const module = await import('./components/ChinaMap');
+  return { default: module.ChinaMap };
+});
+
+const TrendChart = lazy(async () => {
+  const module = await import('./components/TrendChart');
+  return { default: module.TrendChart };
+});
 
 function App() {
   const [selectedProvince, setSelectedProvince] = useState('北京');
@@ -143,13 +151,15 @@ function App() {
     <Layout headerExtras={<SearchBar onSearch={handleSearch} statusText={searchStatus} isEmptyState={isSearchEmpty} />}>
       <div className={styles.dashboard}>
         <div className={styles.mapColumn}>
-          <ChinaMap
-            selectedProvince={selectedProvince}
-            selectedCity={selectedCity}
-            focusResult={focusResult}
-            onProvinceSelect={selectProvince}
-            onCitySelect={selectCity}
-          />
+          <Suspense fallback={<section className={styles.glassCard}>地图加载中…</section>}>
+            <ChinaMap
+              selectedProvince={selectedProvince}
+              selectedCity={selectedCity}
+              focusResult={focusResult}
+              onProvinceSelect={selectProvince}
+              onCitySelect={selectCity}
+            />
+          </Suspense>
         </div>
         <div className={styles.panelColumn}>
           <WeatherCard weather={weather} provinceOverview={provinceOverview} />
@@ -173,10 +183,12 @@ function App() {
         </div>
       </div>
       <div className={styles.trendRow}>
-        <TrendChart
-          data={trendData}
-          title={activeAttraction ? `${activeAttraction.attractionName} 拥挤趋势` : '今日拥挤趋势'}
-        />
+        <Suspense fallback={<section className={styles.glassCard}>趋势图加载中…</section>}>
+          <TrendChart
+            data={trendData}
+            title={activeAttraction ? `${activeAttraction.attractionName} 拥挤趋势` : '今日拥挤趋势'}
+          />
+        </Suspense>
       </div>
     </Layout>
   );

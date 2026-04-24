@@ -49,22 +49,35 @@ class MockWeatherService implements WeatherService {
 
 class ProxyWeatherService implements WeatherService {
   private apiBaseUrl = import.meta.env.VITE_WEATHER_API_BASE_URL?.trim() ?? '';
+  private cache = new Map<string, WeatherData>();
 
   private async requestCityWeather(city: string): Promise<WeatherData | null> {
+    const cached = this.cache.get(city);
+    if (cached) {
+      return cached;
+    }
+
     const url = new URL('/api/weather', this.apiBaseUrl || window.location.origin);
     url.searchParams.set('city', city);
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(url.toString(), {
       headers: {
         Accept: 'application/json',
       },
+      signal: controller.signal,
     });
+    window.clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Weather proxy request failed with HTTP ${response.status}`);
     }
 
-    return (await response.json()) as WeatherData;
+    const weather = (await response.json()) as WeatherData;
+    this.cache.set(city, weather);
+    return weather;
   }
 
   async getCityWeather(city: string): Promise<WeatherData | null> {

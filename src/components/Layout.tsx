@@ -14,8 +14,8 @@ export function Layout({ children, headerExtras }: LayoutProps) {
             <div className={styles.badge}>China Tourism Weather Dashboard</div>
             <h1>中国旅游天气与景区人流可视化大屏</h1>
             <p>
-              面向大屏展示与移动访问的前端 demo。地图、天气与景区人流均已解耦，当前显式使用 mock
-              数据，方便后续接入真实 API。
+              面向大屏展示与移动访问的前端 demo。地图、天气与景区人流均已解耦，天气支持通过服务端代理接入和风天气，
+              失败时自动回退到 mock 数据。
             </p>
           </div>
           {headerExtras}

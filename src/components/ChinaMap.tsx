@@ -1,11 +1,17 @@
 import ReactECharts from 'echarts-for-react';
-import * as echarts from 'echarts';
+import { CanvasRenderer } from 'echarts/renderers';
+import { EffectScatterChart, MapChart } from 'echarts/charts';
+import { GeoComponent, TooltipComponent, type TooltipComponentOption } from 'echarts/components';
+import { init, registerMap, use as registerEChartsModules, type ComposeOption } from 'echarts/core';
 import chinaGeo from '../data/chinaGeo.json';
 import type { SearchResult } from '../types';
 import { normalizeRegionName } from '../utils/format';
 import styles from './ChinaMap.module.css';
 
-echarts.registerMap('china-dashboard', chinaGeo as never);
+registerEChartsModules([CanvasRenderer, GeoComponent, TooltipComponent, MapChart, EffectScatterChart]);
+registerMap('china-dashboard', chinaGeo as never);
+
+type ChinaMapOption = ComposeOption<TooltipComponentOption>;
 
 interface ChinaMapProps {
   selectedProvince: string;
@@ -63,21 +69,29 @@ export function ChinaMap({
     }
   }
 
-  const zoom = focusResult?.type === 'city' || focusResult?.type === 'attraction' || selectedCity ? 1.8 : 1.18;
+  const zoom = focusResult?.type === 'city' || focusResult?.type === 'attraction' || selectedCity ? 1.85 : 1.16;
 
-  const option = {
+  const option: ChinaMapOption = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
       backgroundColor: 'rgba(5, 16, 27, 0.92)',
       borderColor: 'rgba(99, 196, 255, 0.28)',
       textStyle: { color: '#d9f1ff' },
-      formatter: (params: { seriesName: string; name: string; data?: { province?: string } }) => {
-        if (params.seriesName === '城市') {
-          return `${params.name}<br />点击查看城市天气与景区数据`;
+      formatter: (params: { componentType?: string; seriesName?: string; name?: string } | Array<{ name?: string }>) => {
+        if (Array.isArray(params)) {
+          return params[0]?.name ?? '';
         }
 
-        return `${normalizeRegionName(params.name)}<br />点击查看省级概览`;
+        if (params.seriesName === '城市热点') {
+          return `${params.name ?? ''}<br />点击查看城市天气与景区详情`;
+        }
+
+        if (params.componentType === 'geo') {
+          return `${normalizeRegionName(params.name ?? '')}<br />点击查看省级概览`;
+        }
+
+        return params.name ?? '';
       },
     },
     geo: {
@@ -88,72 +102,38 @@ export function ChinaMap({
       layoutCenter: ['50%', '54%'],
       layoutSize: '108%',
       itemStyle: {
-        opacity: 0,
+        areaColor: '#102b45',
+        borderColor: 'rgba(123, 211, 255, 0.74)',
+        borderWidth: 1.05,
+        shadowColor: 'rgba(0, 0, 0, 0.38)',
+        shadowBlur: 16,
+        shadowOffsetY: 8,
       },
       emphasis: {
+        label: { show: false },
         itemStyle: {
-          opacity: 0,
+          areaColor: '#1e527f',
+          borderColor: '#b8f4ff',
+          shadowColor: 'rgba(74, 190, 255, 0.36)',
+          shadowBlur: 24,
         },
       },
+      regions: Object.entries(provinceCenters).map(([province]) => ({
+        name: province,
+        itemStyle:
+          province === selectedProvince
+            ? {
+                areaColor: '#26628d',
+                borderColor: '#89eeff',
+                shadowColor: 'rgba(103, 220, 255, 0.32)',
+                shadowBlur: 28,
+              }
+            : undefined,
+      })),
     },
     series: [
       {
-        name: 'shadow',
-        type: 'map',
-        map: 'china-dashboard',
-        geoIndex: 0,
-        silent: true,
-        z: 1,
-        itemStyle: {
-          areaColor: '#071322',
-          borderColor: 'rgba(15, 49, 84, 0.7)',
-          shadowColor: 'rgba(0, 0, 0, 0.55)',
-          shadowBlur: 28,
-          shadowOffsetY: 18,
-        },
-        emphasis: {
-          disabled: true,
-        },
-      },
-      {
-        name: '省份',
-        type: 'map',
-        map: 'china-dashboard',
-        geoIndex: 0,
-        z: 5,
-        selectedMode: false,
-        label: {
-          show: false,
-        },
-        data: Object.entries(provinceCenters).map(([province]) => ({
-          name: province,
-          itemStyle:
-            province === selectedProvince
-              ? {
-                  areaColor: '#1d5c8f',
-                  borderColor: '#87edff',
-                }
-              : undefined,
-        })),
-        itemStyle: {
-          areaColor: '#0d2740',
-          borderColor: 'rgba(119, 205, 255, 0.62)',
-          borderWidth: 1.1,
-        },
-        emphasis: {
-          label: {
-            show: false,
-          },
-          itemStyle: {
-            areaColor: '#1b4a72',
-            borderColor: '#abf2ff',
-            shadowColor: 'rgba(53, 181, 255, 0.35)',
-            shadowBlur: 24,
-          },
-        },
-      },
-      {
-        name: '城市',
+        name: '城市热点',
         type: 'effectScatter',
         coordinateSystem: 'geo',
         z: 12,
@@ -199,15 +179,20 @@ export function ChinaMap({
         className={styles.chart}
         style={{ height: '100%', width: '100%' }}
         option={option}
+        opts={{ renderer: 'canvas' }}
+        lazyUpdate
+        echarts={init as never}
         onEvents={{
-          click: (params: { seriesName: string; name: string; data?: { province?: string } }) => {
-            if (params.seriesName === '城市') {
+          click: (params: { componentType?: string; seriesName?: string; name: string; data?: { province?: string } }) => {
+            if (params.seriesName === '城市热点') {
               const province = params.data?.province ?? selectedProvince;
               onCitySelect(province, params.name);
               return;
             }
 
-            onProvinceSelect(normalizeRegionName(params.name));
+            if (params.componentType === 'geo') {
+              onProvinceSelect(normalizeRegionName(params.name));
+            }
           },
         }}
       />

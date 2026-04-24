@@ -8,6 +8,8 @@ interface WeatherCardProps {
 
 export function WeatherCard({ weather, provinceOverview }: WeatherCardProps) {
   if (weather) {
+    const isLive = !weather.isMock;
+
     return (
       <section className={styles.card}>
         <p className={styles.eyebrow}>Weather Overview</p>
@@ -35,8 +37,8 @@ export function WeatherCard({ weather, provinceOverview }: WeatherCardProps) {
           </div>
         </div>
         <p className={styles.footnote}>
-          更新时间：{weather.updatedAt} · 当前为 mock 天气数据。真实接入时请通过 `.env` 提供 API key。
-          数据可能存在数分钟延迟。
+          更新时间：{weather.updatedAt} · 数据来源：{isLive ? '和风天气实时接口（经服务端代理）' : 'Mock 演示数据'}。
+          天气实况通常可能存在数分钟延迟。
         </p>
       </section>
     );
@@ -70,7 +72,10 @@ export function WeatherCard({ weather, provinceOverview }: WeatherCardProps) {
           <strong>{provinceOverview?.isMock ? 'Mock' : 'Live'}</strong>
         </div>
       </div>
-      <p className={styles.footnote}>提示：省级数据由当前内置城市样例聚合生成，用于演示信息架构与交互流程。</p>
+      <p className={styles.footnote}>
+        提示：省级概览由当前收录城市聚合生成。
+        {provinceOverview?.isMock ? ' 当前未命中实时天气，已自动回退到 mock 数据。' : ' 当前天气已通过服务端代理接入真实接口。'}
+      </p>
     </section>
   );
 }

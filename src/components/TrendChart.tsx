@@ -1,6 +1,19 @@
 import ReactECharts from 'echarts-for-react';
+import { CanvasRenderer } from 'echarts/renderers';
+import { LineChart } from 'echarts/charts';
+import {
+  GridComponent,
+  TooltipComponent,
+  type GridComponentOption,
+  type TooltipComponentOption,
+} from 'echarts/components';
+import { init, use as registerEChartsModules, type ComposeOption } from 'echarts/core';
 import type { TrendPoint } from '../types';
 import styles from './TrendChart.module.css';
+
+registerEChartsModules([CanvasRenderer, GridComponent, TooltipComponent, LineChart]);
+
+type TrendChartOption = ComposeOption<GridComponentOption | TooltipComponentOption>;
 
 interface TrendChartProps {
   data: TrendPoint[];
@@ -8,7 +21,7 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ data, title = '今日拥挤趋势' }: TrendChartProps) {
-  const option = {
+  const option: TrendChartOption = {
     backgroundColor: 'transparent',
     grid: { top: 34, left: 28, right: 18, bottom: 24 },
     tooltip: {
@@ -69,7 +82,7 @@ export function TrendChart({ data, title = '今日拥挤趋势' }: TrendChartPro
           <div className={styles.caption}>基于当前筛选景点聚合生成的 mock 趋势</div>
         </div>
       </div>
-      <ReactECharts style={{ height: 260, width: '100%' }} option={option} />
+      <ReactECharts style={{ height: 260, width: '100%' }} option={option} opts={{ renderer: 'canvas' }} echarts={init as never} />
     </section>
   );
 }

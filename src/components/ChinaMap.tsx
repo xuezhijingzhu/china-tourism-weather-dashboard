@@ -4,6 +4,7 @@ import { EffectScatterChart, MapChart } from 'echarts/charts';
 import { GeoComponent, TooltipComponent, type TooltipComponentOption } from 'echarts/components';
 import { init, registerMap, use as registerEChartsModules, type ComposeOption } from 'echarts/core';
 import chinaGeo from '../data/chinaGeo.json';
+import { cityDirectory } from '../data/regionDirectory';
 import type { SearchResult } from '../types';
 import { normalizeRegionName } from '../utils/format';
 import styles from './ChinaMap.module.css';
@@ -38,18 +39,11 @@ const getProvinceCenterMap = () => {
 
 const provinceCenters = getProvinceCenterMap();
 
-const cityMarkers = [
-  { name: '北京', value: [116.4074, 39.9042, 24], province: '北京' },
-  { name: '上海', value: [121.4737, 31.2304, 23], province: '上海' },
-  { name: '广州', value: [113.2644, 23.1291, 29], province: '广东' },
-  { name: '西安', value: [108.9398, 34.3416, 27], province: '陕西' },
-  { name: '成都', value: [104.0665, 30.5723, 22], province: '四川' },
-  { name: '杭州', value: [120.1551, 30.2741, 25], province: '浙江' },
-  { name: '重庆', value: [106.5516, 29.563, 28], province: '重庆' },
-  { name: '哈尔滨', value: [126.535, 45.8038, 15], province: '黑龙江' },
-  { name: '沈阳', value: [123.4315, 41.8057, 19], province: '辽宁' },
-  { name: '南京', value: [118.7969, 32.0603, 26], province: '江苏' },
-];
+const cityMarkers = cityDirectory.map((item, index) => ({
+  name: item.city,
+  value: [item.center[0], item.center[1], 18 + (index % 12)],
+  province: item.province,
+}));
 
 export function ChinaMap({
   selectedProvince,
@@ -150,7 +144,10 @@ export function ChinaMap({
           show: true,
           position: 'right',
           distance: 8,
-          formatter: '{b}',
+          formatter: (params: { name?: string; value?: number[] }) => {
+            const longitude = Array.isArray(params.value) ? params.value[0] : 0;
+            return zoom >= 1.45 || longitude <= 112 ? params.name ?? '' : '';
+          },
           color: '#d9f7ff',
           fontSize: 11,
         },

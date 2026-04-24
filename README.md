@@ -88,6 +88,66 @@ QWEATHER_KEY=your-qweather-api-key
 
 `https://china-tourism-weather-dashboard.vercel.app`
 
+## 更适合中国访问的部署方案
+
+如果你主要面向中国大陆访问，推荐额外部署一份到腾讯 EdgeOne Pages。
+
+根据 EdgeOne Pages 官方文档：
+
+- 支持直接导入 GitHub 仓库
+- 支持 Vite 项目自动识别与部署
+- 支持 `node-functions` 目录下的动态 API，并可通过 `context.env` 读取环境变量
+
+官方文档：
+
+- [导入 Git 仓库](https://pages.edgeone.ai/document/importing-a-git-repository)
+- [Vite 部署](https://pages.edgeone.ai/zh/document/vite)
+- [Node Functions](https://pages.edgeone.ai/document/node-functions)
+
+### 本项目中的 EdgeOne 适配
+
+当前仓库已经加入：
+
+- [node-functions/api/weather.js](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/node-functions/api/weather.js)
+
+它提供与 Vercel 同路径的 `/api/weather` 接口，因此前端无需改代码，就能在 EdgeOne Pages 上复用。
+
+### EdgeOne 部署步骤
+
+1. 打开 EdgeOne Pages 控制台
+2. 选择 `Import Git Repository`
+3. 连接 GitHub 并选择仓库 `xuezhijingzhu/china-tourism-weather-dashboard`
+4. 框架选择 `Vite`
+5. Root Directory 保持仓库根目录
+6. 添加环境变量：
+
+```env
+VITE_WEATHER_PROVIDER=qweather_proxy
+VITE_CROWD_PROVIDER=mock
+QWEATHER_API_HOST=你的和风天气 API Host
+QWEATHER_KEY=你的和风天气 API KEY
+```
+
+7. 点击部署
+
+### 之后怎么推送
+
+不管是 Vercel 还是 EdgeOne，只要都绑定了同一个 GitHub 仓库，后续更新流程都一样：
+
+```bash
+git add .
+git commit -m "你的说明"
+git push origin main
+```
+
+或者在 GitHub Desktop 里：
+
+1. 写提交信息
+2. 点击 `Commit to main`
+3. 点击 `Push origin`
+
+推送完成后，Vercel 和 EdgeOne 都会自动触发新部署。
+
 ## 项目中的关键文件
 
 - [src/services/weatherService.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/src/services/weatherService.ts)

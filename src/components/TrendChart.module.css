@@ -1,0 +1,24 @@
+.card {
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(110, 183, 255, 0.18);
+  background: rgba(7, 20, 34, 0.76);
+  backdrop-filter: blur(16px);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.head h3 {
+  margin: 0;
+}
+
+.caption {
+  color: rgba(209, 232, 255, 0.66);
+  font-size: 12px;
+}

@@ -1,0 +1,46 @@
+.card {
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(110, 183, 255, 0.18);
+  background: rgba(7, 20, 34, 0.76);
+  backdrop-filter: blur(16px);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.head h3,
+.item h4 {
+  margin: 0;
+}
+
+.caption {
+  color: rgba(209, 232, 255, 0.66);
+  font-size: 12px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.item {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(10, 27, 44, 0.92);
+  border: 1px solid rgba(118, 189, 255, 0.12);
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: rgba(225, 240, 255, 0.8);
+  font-size: 13px;
+}

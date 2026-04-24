@@ -1,0 +1,62 @@
+.dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(380px, 0.92fr);
+  gap: 18px;
+}
+
+.mapColumn {
+  min-width: 0;
+}
+
+.panelColumn {
+  display: grid;
+  gap: 18px;
+}
+
+.trendRow {
+  margin-top: 18px;
+}
+
+.glassCard {
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(110, 183, 255, 0.18);
+  background: rgba(7, 20, 34, 0.76);
+  backdrop-filter: blur(16px);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.panelHead h3 {
+  margin: 0;
+}
+
+.tips {
+  display: grid;
+  gap: 10px;
+}
+
+.tip {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(11, 30, 49, 0.82);
+  border: 1px solid rgba(124, 192, 255, 0.12);
+  line-height: 1.6;
+}
+
+.caption {
+  color: rgba(209, 232, 255, 0.66);
+  font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,58 @@
+.shell {
+  min-height: 100vh;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(55, 135, 255, 0.2), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(0, 214, 201, 0.15), transparent 22%),
+    linear-gradient(180deg, #06111f 0%, #081726 48%, #050d18 100%);
+  color: #e7f4ff;
+}
+
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.titleWrap h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 40px);
+  font-family: Bahnschrift, 'Segoe UI Variable', 'PingFang SC', sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.titleWrap p {
+  margin: 10px 0 0;
+  color: rgba(212, 233, 255, 0.72);
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(12, 35, 63, 0.76);
+  border: 1px solid rgba(114, 197, 255, 0.3);
+  color: #8fd8ff;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    padding: 16px;
+  }
+
+  .topbar {
+    flex-direction: column;
+  }
+}

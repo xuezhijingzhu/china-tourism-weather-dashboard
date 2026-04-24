@@ -1,22 +1,18 @@
 # china-tourism-weather-dashboard
 
-基于 `Vite + React + TypeScript + ECharts` 的中国旅游天气与景区人流可视化大屏 demo。当前项目已经改造成适合部署到 Vercel 的版本：前端只请求同域 `/api/weather`，和风天气 `API KEY` 只保存在服务端环境变量，不暴露到浏览器。
+基于 `Vite + React + TypeScript + ECharts` 的中国旅游天气与景区人流可视化大屏 demo。
 
-## 当前部署模式
+当前项目支持三种运行方式：
 
-- 前端：Vite 构建为静态站点
-- 天气接口：Vercel Serverless Function `api/weather.ts`
-- 本地开发：`npm run dev` 时由 Vite Node 中间件代理 `/api/weather`
-- 线上部署：Vercel 运行 `api/weather.ts`，前端通过同域接口取天气
+- 本地开发：`npm run dev`
+- Vercel：前端 + `api/weather.ts`
+- Cloudflare Pages：前端 + `functions/api/weather.js`
 
-## 功能特性
+项目已经把天气接口改成了代理模式：
 
-- 中国地图可视化，支持省份 hover 高亮、点击省份查看概览、点击城市查看城市级天气与景区数据
-- 科技感蓝黑主题，半透明玻璃卡片，桌面端大屏布局与移动端单列布局
-- 搜索省份、城市或景点名称，并定位到对应地区
-- `WeatherService` 与 `CrowdService` 抽象层，方便从 mock 平滑切换到真实 API
-- 展示天气卡片、热门景点排行、景点列表、拥挤趋势和出行提示
-- 所有敏感天气凭据通过服务端环境变量配置，前端代码不硬编码 key
+- 浏览器只请求同域 `/api/weather`
+- 和风天气 `API Host` 与 `API KEY` 只放在服务端环境变量里
+- 前端不会直接暴露 `QWEATHER_KEY`
 
 ## 本地运行
 
@@ -25,7 +21,7 @@ npm install
 npm run dev
 ```
 
-如果 PowerShell 遇到 `npm.ps1` 执行策略限制，可改用：
+如果 PowerShell 遇到执行策略限制，可以改用：
 
 ```bash
 npm.cmd install
@@ -47,148 +43,152 @@ QWEATHER_KEY=your-qweather-api-key
 说明：
 
 - `VITE_` 开头的变量会进入前端构建
-- `QWEATHER_API_HOST` 和 `QWEATHER_KEY` 不会进入浏览器，只在本地 Node 中间件和 Vercel 服务端使用
-- 如果你只想看纯 mock 演示，可把 `VITE_WEATHER_PROVIDER=mock`
+- `QWEATHER_API_HOST` 和 `QWEATHER_KEY` 只给本地 dev 中间件、Vercel Function、Cloudflare Function 使用
+- 如果只想看前端效果，可把 `VITE_WEATHER_PROVIDER=mock`
 
-## Vercel 部署
+## Cloudflare Pages 部署
 
-### 1. 推送到 GitHub
-
-把项目推到你自己的 GitHub 仓库。
-
-### 2. 在 Vercel 导入仓库
-
-1. 打开 [Vercel](https://vercel.com/)
-2. 点击 `Add New...` -> `Project`
-3. 选择你的 GitHub 仓库
-4. Framework Preset 选择 `Vite`
-5. Build Command 保持 `npm run build`
-6. Output Directory 保持 `dist`
-
-### 3. 配置 Environment Variables
-
-在 Vercel 项目的 `Settings` -> `Environment Variables` 中添加：
-
-- `VITE_WEATHER_PROVIDER` = `qweather_proxy`
-- `VITE_CROWD_PROVIDER` = `mock`
-- `QWEATHER_API_HOST` = 你的和风天气 API Host
-- `QWEATHER_KEY` = 你的和风天气 API KEY
-
-如果未来天气代理放到其他域名，再额外配置：
-
-- `VITE_WEATHER_API_BASE_URL` = `https://your-domain.vercel.app`
-
-通常同域部署时，这一项留空即可。
-
-### 4. 重新部署
-
-保存环境变量后，在 Vercel 里触发一次 Redeploy。
-
-部署成功后，站点会自动拥有一个公网网址，比如：
-
-`https://china-tourism-weather-dashboard.vercel.app`
-
-## 更适合中国访问的部署方案
-
-如果你主要面向中国大陆访问，推荐额外部署一份到腾讯 EdgeOne Pages。
-
-根据 EdgeOne Pages 官方文档：
-
-- 支持直接导入 GitHub 仓库
-- 支持 Vite 项目自动识别与部署
-- 支持 `node-functions` 目录下的动态 API，并可通过 `context.env` 读取环境变量
+如果你主要想要比 Vercel 更稳一些的海外/CDN 访问体验，推荐优先试 Cloudflare Pages。
 
 官方文档：
 
-- [导入 Git 仓库](https://pages.edgeone.ai/document/importing-a-git-repository)
-- [Vite 部署](https://pages.edgeone.ai/zh/document/vite)
-- [Node Functions](https://pages.edgeone.ai/document/node-functions)
+- [Pages Git 部署](https://developers.cloudflare.com/pages/get-started/git-integration/)
+- [Pages Functions](https://developers.cloudflare.com/pages/functions/get-started/)
+- [Pages 环境变量](https://developers.cloudflare.com/pages/configuration/build-configuration/#environment-variables)
+- [Vite on Cloudflare Pages](https://developers.cloudflare.com/pages/framework-guides/deploy-a-vite-site/)
 
-### 本项目中的 EdgeOne 适配
+### 1. 导入 GitHub 仓库
 
-当前仓库已经加入：
+1. 打开 [Cloudflare Dashboard](https://dash.cloudflare.com/)
+2. 进入 `Workers & Pages`
+3. 点击 `Create application`
+4. 选择 `Pages`
+5. 选择 `Connect to Git`
+6. 连接 GitHub 并选择仓库 `xuezhijingzhu/china-tourism-weather-dashboard`
 
-- [node-functions/api/weather.js](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/node-functions/api/weather.js)
+### 2. 构建配置
 
-它提供与 Vercel 同路径的 `/api/weather` 接口，因此前端无需改代码，就能在 EdgeOne Pages 上复用。
+如果 Cloudflare 没有自动识别为 Vite，就手动填：
 
-### EdgeOne 部署步骤
+- `Production branch`: `main`
+- `Framework preset`: `Vite`
+- `Build command`: `npm run build`
+- `Build output directory`: `dist`
+- `Root directory`: 留空
 
-1. 打开 EdgeOne Pages 控制台
-2. 选择 `Import Git Repository`
-3. 连接 GitHub 并选择仓库 `xuezhijingzhu/china-tourism-weather-dashboard`
-4. 框架选择 `Vite`
-5. Root Directory 保持仓库根目录
-6. 添加环境变量：
+### 3. 环境变量
+
+在 Cloudflare Pages 的 `Settings` 或导入流程里添加：
 
 ```env
 VITE_WEATHER_PROVIDER=qweather_proxy
 VITE_CROWD_PROVIDER=mock
-QWEATHER_API_HOST=你的和风天气 API Host
+QWEATHER_API_HOST=nu5u9x4hxp.re.qweatherapi.com
 QWEATHER_KEY=你的和风天气 API KEY
 ```
 
-7. 点击部署
+说明：
 
-### 之后怎么推送
+- 如果前后端都部署在同一个 Cloudflare Pages 项目里，不需要配置 `VITE_WEATHER_API_BASE_URL`
+- 前端会直接请求同域 `/api/weather`
+- `QWEATHER_KEY` 只存在 Cloudflare Pages Functions 运行时
 
-不管是 Vercel 还是 EdgeOne，只要都绑定了同一个 GitHub 仓库，后续更新流程都一样：
+### 4. 部署后如何验证
 
-```bash
-git add .
-git commit -m "你的说明"
-git push origin main
+部署完成后先验证接口：
+
+```text
+https://你的-pages-域名/api/weather?city=北京
 ```
 
-或者在 GitHub Desktop 里：
+如果返回 JSON，说明：
 
-1. 写提交信息
-2. 点击 `Commit to main`
-3. 点击 `Push origin`
+- Cloudflare Functions 已生效
+- 和风天气凭据已正确接入
 
-推送完成后，Vercel 和 EdgeOne 都会自动触发新部署。
+再打开首页，看天气卡片是否显示实时数据状态。
 
-## 项目中的关键文件
+## Vercel 部署
+
+如果仍然保留 Vercel，环境变量如下：
+
+```env
+VITE_WEATHER_PROVIDER=qweather_proxy
+VITE_CROWD_PROVIDER=mock
+QWEATHER_API_HOST=nu5u9x4hxp.re.qweatherapi.com
+QWEATHER_KEY=你的和风天气 API KEY
+```
+
+项目中的 [api/weather.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/api/weather.ts) 会作为 Vercel Function 运行。
+
+## 为什么帽子云静态托管不能直接放真实天气 key
+
+因为静态站点只有前端资源：
+
+- HTML
+- JS
+- CSS
+
+如果把 `QWEATHER_KEY` 放进静态前端环境变量，它最终会出现在浏览器可下载的前端代码里。
+
+所以如果使用纯静态平台：
+
+- 要么天气继续用 `mock`
+- 要么把真实天气代理部署在支持函数的平台上，再让前端请求那个代理
+
+Cloudflare Pages 正好可以把这两部分放在同一个项目里解决。
+
+## 当前关键文件
 
 - [src/services/weatherService.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/src/services/weatherService.ts)
-  前端天气抽象层，走 `/api/weather`
+  前端天气抽象层，默认走 `/api/weather`
+- [functions/api/weather.js](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/functions/api/weather.js)
+  Cloudflare Pages Functions 版本的天气代理
 - [api/weather.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/api/weather.ts)
-  Vercel Serverless 天气代理接口
+  Vercel 版本的天气代理
 - [server/qweather.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/server/qweather.ts)
-  和风天气请求与字段映射逻辑
-- [vite.config.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/vite.config.ts)
-  本地开发时的 `/api/weather` Node 中间件
+  和风天气字段映射逻辑
+- [src/components/ChinaMap.tsx](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/src/components/ChinaMap.tsx)
+  中国地图与省级下钻
+- [src/data/attractionCandidates.ts](/C:/Users/17295/Desktop/AI/china-tourism-weather-dashboard/src/data/attractionCandidates.ts)
+  联网整理的地级市候选景点
 
 ## 当前 mock 数据说明
 
-- 包含北京、上海、广州、西安、成都、杭州、重庆、哈尔滨、沈阳、南京 10 个城市
+- 包含北京、上海、广州、西安、成都、杭州、重庆、哈尔滨、沈阳、南京等城市
 - 每个城市至少 3 个景点
-- 所有天气与人流字段都带有 `isMock` 标记
-- 页面文案会明确提示当前为 mock 演示，不伪装成真实实时数据
+- 页面会明确区分 mock 与真实天气
+- 人流量当前仍以 mock 为主
 
-## 未来接入真实人流 API
+## 后续接入真实人流 API 的建议
 
-推荐数据源：
+优先考虑这些来源：
 
 - 百度慧眼
-- 高德商业/位置数据
+- 高德商业位置数据
 - 景区官方开放接口
-- 地方文旅数据平台
+- 各地文旅平台开放数据
 
-建议接入步骤：
+推荐接入步骤：
 
 1. 在 `crowdService.ts` 中新增真实 provider
-2. 统一将外部字段转换为 `AttractionCrowdData`
-3. 将趋势数据整理成 `TrendPoint[]`
-4. 为不同来源补充 `source` 与可信度字段
-5. 增加缓存、更新时间和降级提示
+2. 统一把外部字段映射成 `AttractionCrowdData`
+3. 为每条景点数据补充 `source` 字段
+4. 给趋势数据增加更新时间和缓存策略
+5. 明确区分“官方实时数据”和“模型估算/模拟数据”
 
-## TODO
+## 推送更新
 
-1. 给 `/api/weather` 增加更细的缓存与限流
-2. 为城市目录补充更多省份、城市、景点与行政编码
-3. 增加地图 drill-down，支持从省到市的更精细 GeoJSON
-4. 接入真实景区客流 API，并区分官方数据与估算数据来源
-5. 增加多条件筛选，比如天气类型、拥挤等级、温度区间
-6. 增加自动轮播模式，适合会议室或指挥大屏循环展示
-7. 增加单元测试与组件测试
+后续只要继续推 GitHub，Cloudflare Pages 就会自动重新部署：
+
+```bash
+git add .
+git commit -m "your message"
+git push origin main
+```
+
+或者 GitHub Desktop：
+
+1. 填写 commit message
+2. 点击 `Commit to main`
+3. 点击 `Push origin`
